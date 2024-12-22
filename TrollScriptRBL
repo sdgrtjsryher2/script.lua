@@ -1,0 +1,181 @@
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 564, 0, 360)
+frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+frame.BackgroundTransparency = 0.1
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = frame
+
+local pageFrame = Instance.new("Frame")
+pageFrame.Size = UDim2.new(0, 164, 0, 340)
+pageFrame.Position = UDim2.new(0.011, 0, 0.019, 0)
+pageFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+pageFrame.BorderSizePixel = 0
+pageFrame.Parent = frame
+
+local pageFrameCorner = Instance.new("UICorner")
+pageFrameCorner.CornerRadius = UDim.new(0, 10)
+pageFrameCorner.Parent = pageFrame
+
+local closeButton = Instance.new("TextButton")
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0, 50, 0, 50)
+closeButton.Position = UDim2.new(1, -50, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 20
+closeButton.Parent = frame
+
+closeButton.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
+
+local tabs = {"Troll", "Visuals", "Crash Tool", "Credits"}
+local tabButtons = {}
+local frames = {}
+
+for i, tabName in ipairs(tabs) do
+	local button = Instance.new("TextButton")
+	button.Text = tabName
+	button.Size = UDim2.new(0, 158, 0, 50)
+	button.Position = UDim2.new(0.018, 0, 0.032 + (i - 1) * 0.18, 0)
+	button.BackgroundColor3 = Color3.fromRGB(170, 170, 170)
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.Font = Enum.Font.SourceSansBold
+	button.TextSize = 20
+	button.Parent = pageFrame
+
+	local buttonCorner = Instance.new("UICorner")
+	buttonCorner.CornerRadius = UDim.new(0, 10)
+	buttonCorner.Parent = button
+
+	tabButtons[tabName] = button
+
+	local tabFrame = Instance.new("Frame")
+	tabFrame.Size = UDim2.new(0, 358, 0, 266)
+	tabFrame.Position = UDim2.new(0.328, 0, 0.189, 0)
+	tabFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	tabFrame.BorderSizePixel = 0
+	tabFrame.Visible = i == 1
+	tabFrame.Parent = frame
+
+	local tabFrameCorner = Instance.new("UICorner")
+	tabFrameCorner.CornerRadius = UDim.new(0, 10)
+	tabFrameCorner.Parent = tabFrame
+
+	frames[tabName] = tabFrame
+end
+
+for tabName, button in pairs(tabButtons) do
+	button.MouseButton1Click:Connect(function()
+		for name, tabFrame in pairs(frames) do
+			tabFrame.Visible = name == tabName
+		end
+	end)
+end
+
+local visualsFrame = frames["Visuals"]
+
+local espEnabled = false
+local espConnections = {}
+
+local espButton = Instance.new("TextButton")
+espButton.Text = "Enable ESP"
+espButton.Size = UDim2.new(0, 160, 0, 50)
+espButton.Position = UDim2.new(0.05, 0, 0.1, 0)
+espButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+espButton.Font = Enum.Font.SourceSansBold
+espButton.TextSize = 20
+espButton.Parent = visualsFrame
+
+espButton.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	espButton.Text = espEnabled and "Disable ESP" or "Enable ESP"
+
+	for _, conn in pairs(espConnections) do
+		conn:Disconnect()
+	end
+	espConnections = {}
+
+	if espEnabled then
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr ~= player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+				local billboard = Instance.new("BillboardGui", plr.Character.Head)
+				billboard.Size = UDim2.new(0, 200, 0, 50)
+				billboard.AlwaysOnTop = true
+
+				local nameLabel = Instance.new("TextLabel", billboard)
+				nameLabel.Size = UDim2.new(1, 0, 1, 0)
+				nameLabel.Text = plr.Name .. " | HP: " .. math.floor(plr.Character.Humanoid.Health)
+				nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+				nameLabel.BackgroundTransparency = 1
+				nameLabel.Font = Enum.Font.SourceSansBold
+				nameLabel.TextSize = 14
+
+				table.insert(espConnections, plr.Character.Humanoid.HealthChanged:Connect(function()
+					nameLabel.Text = plr.Name .. " | HP: " .. math.floor(plr.Character.Humanoid.Health)
+				end))
+
+				table.insert(espConnections, plr.AncestryChanged:Connect(function()
+					if not plr:IsDescendantOf(game) then
+						billboard:Destroy()
+					end
+				end))
+			end
+		end
+	else
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr.Character and plr.Character:FindFirstChild("Head") then
+				for _, gui in pairs(plr.Character.Head:GetChildren()) do
+					if gui:IsA("BillboardGui") then
+						gui:Destroy()
+					end
+				end
+			end
+		end
+	end
+end)
+
+local teamColorEnabled = false
+
+local teamColorButton = Instance.new("TextButton")
+teamColorButton.Text = "Enable TeamColor"
+teamColorButton.Size = UDim2.new(0, 160, 0, 50)
+teamColorButton.Position = UDim2.new(0.05, 0, 0.3, 0)
+teamColorButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+teamColorButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teamColorButton.Font = Enum.Font.SourceSansBold
+teamColorButton.TextSize = 20
+teamColorButton.Parent = visualsFrame
+
+teamColorButton.MouseButton1Click:Connect(function()
+	teamColorEnabled = not teamColorEnabled
+	teamColorButton.Text = teamColorEnabled and "Disable TeamColor" or "Enable TeamColor"
+
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player and plr.Character then
+			if teamColorEnabled then
+				local highlight = Instance.new("Highlight", plr.Character)
+				highlight.FillColor = plr.TeamColor.Color
+				highlight.OutlineColor = Color3.new(0, 0, 0)
+				highlight.Name = "TeamColorHighlight"
+			else
+				for _, highlight in pairs(plr.Character:GetChildren()) do
+					if highlight:IsA("Highlight") and highlight.Name == "TeamColorHighlight" then
+						highlight:Destroy()
+					end
+				end
+			end
+		end
+	end
+end)
