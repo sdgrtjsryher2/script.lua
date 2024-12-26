@@ -110,6 +110,47 @@ end
 
 local trollFrame = frames["Troll"]
 
+
+
+local healthInput = Instance.new("TextBox")
+healthInput.Text = "Enter Health"
+healthInput.Size = UDim2.new(0, 160, 0, 50)
+healthInput.Position = UDim2.new(0.022, 0,0.662, 0)
+healthInput.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+healthInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+healthInput.Font = Enum.Font.FredokaOne
+healthInput.TextSize = 20
+healthInput.PlaceholderText = "Enter Health"
+healthInput.Parent = trollFrame
+
+
+
+local healthButton = Instance.new("TextButton")
+healthButton.Text = "Set Health"
+healthButton.Size = UDim2.new(0, 160, 0, 50)
+healthButton.Position = UDim2.new(0.547, 0,0.662, 0)
+healthButton.BackgroundColor3 = Color3.fromRGB(0, 255, 157)
+healthButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+healthButton.Font = Enum.Font.FredokaOne
+healthButton.TextSize = 20
+healthButton.Parent = trollFrame
+
+local uiStrokeHVx = Instance.new("UICorner")
+uiStrokeHVx.CornerRadius = UDim.new(0, 10)
+uiStrokeHVx.Parent = healthInput
+
+local uiStrokeBNx = Instance.new("UICorner")
+uiStrokeBNx.CornerRadius = UDim.new(0, 10)
+uiStrokeBNx.Parent = healthButton
+
+healthButton.MouseButton1Click:Connect(function()
+	local health = tonumber(healthInput.Text)
+	if health and health > 0 and player.Character and player.Character:FindFirstChild("Humanoid") then
+		player.Character.Humanoid.MaxHealth = health
+		player.Character.Humanoid.Health = health
+	end
+end)
+
 local function createControl(inputPlaceholder, buttonText, position, callback)
 	local input = Instance.new("TextBox")
 	input.Text = inputPlaceholder
@@ -314,7 +355,7 @@ noclipButton.MouseButton1Click:Connect(toggleNoclip)
 
 local flyEnabled = false
 local flyButton = Instance.new("TextButton")
-flyButton.Text = "Enable Glitch"
+flyButton.Text = "Enable Fly"
 flyButton.Size = UDim2.new(0, 160, 0, 50)
 flyButton.Position = UDim2.new(0.05, 0, 0.3, 0)
 flyButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
@@ -325,7 +366,7 @@ flyButton.Parent = playerFrame
 
 local function toggleFly()
 	flyEnabled = not flyEnabled
-	flyButton.Text = flyEnabled and "Disable Glitch" or "Enable Glitch"
+	flyButton.Text = flyEnabled and "Disable Fly" or "Enable Fly"
 	if flyEnabled then
 		local bodyVelocity = Instance.new("BodyVelocity")
 		bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
@@ -353,7 +394,7 @@ flyButton.MouseButton1Click:Connect(toggleFly)
 local creditsFrame = frames["Credits"]
 
 local creditsLabel = Instance.new("TextLabel")
-creditsLabel.Text = "Made by BBtokerBB"
+creditsLabel.Text = "Made by YourName"
 creditsLabel.Size = UDim2.new(1, 0, 1, 0)
 creditsLabel.BackgroundTransparency = 1
 creditsLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
@@ -361,31 +402,3 @@ creditsLabel.Font = Enum.Font.SourceSansBold
 creditsLabel.TextSize = 24
 creditsLabel.TextWrapped = true
 creditsLabel.Parent = creditsFrame
-
-
-local infiniteJumpEnabled = false
-local infiniteJumpButton = Instance.new("TextButton")
-infiniteJumpButton.Text = "Enable Infinite Jump"
-infiniteJumpButton.Size = UDim2.new(0, 160, 0, 50)
-infiniteJumpButton.Position = UDim2.new(0.05, 0, 0.5, 0)
-infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-infiniteJumpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-infiniteJumpButton.Font = Enum.Font.SourceSansBold
-infiniteJumpButton.TextSize = 20
-infiniteJumpButton.Parent = playerFrame
-
-local userInputService = game:GetService("UserInputService")
-
-local function toggleInfiniteJump()
-	infiniteJumpEnabled = not infiniteJumpEnabled
-	infiniteJumpButton.Text = infiniteJumpEnabled and "Disable Infinite Jump" or "Enable Infinite Jump"
-end
-
-userInputService.JumpRequest:Connect(function()
-	if infiniteJumpEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
-		player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-	end
-end)
-
-infiniteJumpButton.MouseButton1Click:Connect(toggleInfiniteJump)
-
