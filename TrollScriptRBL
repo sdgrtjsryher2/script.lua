@@ -432,3 +432,31 @@ end
 
 -- Привязка кнопки к функции
 teleportAllButton.MouseButton1Click:Connect(teleportAllPlayers)
+
+
+
+local infiniteJumpEnabled = false
+
+local infiniteJumpButton = Instance.new("TextButton")
+infiniteJumpButton.Text = "Enable Infinite Jump"
+infiniteJumpButton.Size = UDim2.new(0, 160, 0, 50)
+infiniteJumpButton.Position = UDim2.new(0.05, 0, 0.7, 0)
+infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+infiniteJumpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+infiniteJumpButton.Font = Enum.Font.SourceSansBold
+infiniteJumpButton.TextSize = 20
+infiniteJumpButton.Parent = playerFrame
+
+local function toggleInfiniteJump()
+	infiniteJumpEnabled = not infiniteJumpEnabled
+	infiniteJumpButton.Text = infiniteJumpEnabled and "Disable Infinite Jump" or "Enable Infinite Jump"
+	if infiniteJumpEnabled then
+		game:GetService("UserInputService").JumpRequest:Connect(function()
+			if infiniteJumpEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+				player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end)
+	end
+end
+
+infiniteJumpButton.MouseButton1Click:Connect(toggleInfiniteJump)
