@@ -403,7 +403,8 @@ creditsLabel.TextSize = 24
 creditsLabel.TextWrapped = true
 creditsLabel.Parent = creditsFrame
 
--- Добавление кнопки телепортации во вкладку Player
+
+
 local teleportAllButton = Instance.new("TextButton")
 teleportAllButton.Text = "Teleport All"
 teleportAllButton.Size = UDim2.new(0, 160, 0, 50)
@@ -414,22 +415,20 @@ teleportAllButton.Font = Enum.Font.SourceSansBold
 teleportAllButton.TextSize = 20
 teleportAllButton.Parent = playerFrame
 
-local teleportAllCorner = Instance.new("UICorner")
-teleportAllCorner.CornerRadius = UDim.new(0, 10)
-teleportAllCorner.Parent = teleportAllButton
+
 
 
 local function teleportAllPlayers()
-    local localCharacter = player.Character
-    if localCharacter and localCharacter:FindFirstChild("HumanoidRootPart") then
-        local localPosition = localCharacter.HumanoidRootPart.Position
-        for _, targetPlayer in pairs(game.Players:GetPlayers()) do
-            if targetPlayer ~= player and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                targetPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(localPosition)
-            end
-        end
-    end
+	local localCharacter = player.Character
+	if localCharacter and localCharacter:FindFirstChild("HumanoidRootPart") then
+		local localPosition = localCharacter.HumanoidRootPart.Position
+		for _, targetPlayer in pairs(game.Players:GetPlayers()) do
+			if targetPlayer ~= player and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				targetPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(localPosition)
+			end
+		end
+	end
 end
 
+-- Привязка кнопки к функции
 teleportAllButton.MouseButton1Click:Connect(teleportAllPlayers)
-
