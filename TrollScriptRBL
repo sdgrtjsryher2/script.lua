@@ -110,12 +110,10 @@ end
 
 local trollFrame = frames["Troll"]
 
-
-
 local healthInput = Instance.new("TextBox")
 healthInput.Text = "Enter Health"
 healthInput.Size = UDim2.new(0, 160, 0, 50)
-healthInput.Position = UDim2.new(0.022, 0,0.662, 0)
+healthInput.Position = UDim2.new(0.022, 0, 0.662, 0)
 healthInput.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
 healthInput.TextColor3 = Color3.fromRGB(0, 0, 0)
 healthInput.Font = Enum.Font.FredokaOne
@@ -123,12 +121,10 @@ healthInput.TextSize = 20
 healthInput.PlaceholderText = "Enter Health"
 healthInput.Parent = trollFrame
 
-
-
 local healthButton = Instance.new("TextButton")
 healthButton.Text = "Set Health"
 healthButton.Size = UDim2.new(0, 160, 0, 50)
-healthButton.Position = UDim2.new(0.547, 0,0.662, 0)
+healthButton.Position = UDim2.new(0.547, 0, 0.662, 0)
 healthButton.BackgroundColor3 = Color3.fromRGB(0, 255, 157)
 healthButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 healthButton.Font = Enum.Font.FredokaOne
@@ -146,8 +142,9 @@ uiStrokeBNx.Parent = healthButton
 healthButton.MouseButton1Click:Connect(function()
 	local health = tonumber(healthInput.Text)
 	if health and health > 0 and player.Character and player.Character:FindFirstChild("Humanoid") then
-		player.Character.Humanoid.MaxHealth = health
-		player.Character.Humanoid.Health = health
+		local humanoid = player.Character.Humanoid
+		humanoid.MaxHealth = health
+		humanoid.Health = math.min(humanoid.Health, health) -- Убедитесь, что здоровье не превышает MaxHealth
 	end
 end)
 
@@ -233,19 +230,26 @@ local function toggleESP()
 	espEnabled = not espEnabled
 	espButton.Text = espEnabled and "Disable ESP" or "Enable ESP"
 	if espEnabled then
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-				local billboard = Instance.new("BillboardGui", plr.Character.Head)
-				billboard.Size = UDim2.new(0, 200, 0, 50)
-				billboard.AlwaysOnTop = true
-				billboard.Name = "ESP"
-				local nameLabel = Instance.new("TextLabel", billboard)
-				nameLabel.Size = UDim2.new(1, 0, 1, 0)
-				nameLabel.Text = plr.Name .. " | HP: " .. math.floor(plr.Character.Humanoid.Health)
-				nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-				nameLabel.BackgroundTransparency = 1
-				nameLabel.Font = Enum.Font.SourceSansBold
-				nameLabel.TextSize = 14
+		while task.wait(0.3) do
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				if plr ~= player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+					local billboard = Instance.new("BillboardGui", plr.Character.Head)
+					billboard.Size = UDim2.new(0, 200, 0, 50)
+					billboard.AlwaysOnTop = true
+					billboard.Name = "ESP"
+					local nameLabel = Instance.new("TextLabel", billboard)
+					nameLabel.TextStrokeTransparency = 0
+					nameLabel.Size = UDim2.new(1, 0, 1, 0)
+					nameLabel.Text = plr.Name .. " | HP: " .. math.floor(plr.Character.Humanoid.Health)
+					nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+					nameLabel.BackgroundTransparency = 1
+					nameLabel.Font = Enum.Font.SourceSansBold
+					nameLabel.TextSize = 14
+					
+					while task.wait(0.5) do
+						nameLabel.Text = plr.Name .. " | HP: " .. math.floor(plr.Character.Humanoid.Health)
+					end
+				end
 			end
 		end
 	else
@@ -403,8 +407,6 @@ creditsLabel.TextSize = 24
 creditsLabel.TextWrapped = true
 creditsLabel.Parent = creditsFrame
 
-
-
 local teleportAllButton = Instance.new("TextButton")
 teleportAllButton.Text = "Teleport All"
 teleportAllButton.Size = UDim2.new(0, 160, 0, 50)
@@ -414,9 +416,6 @@ teleportAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportAllButton.Font = Enum.Font.SourceSansBold
 teleportAllButton.TextSize = 20
 teleportAllButton.Parent = playerFrame
-
-
-
 
 local function teleportAllPlayers()
 	local localCharacter = player.Character
@@ -430,5 +429,69 @@ local function teleportAllPlayers()
 	end
 end
 
--- Привязка кнопки к функции
 teleportAllButton.MouseButton1Click:Connect(teleportAllPlayers)
+
+local goodModeEnabled = false
+local goodModeButton = Instance.new("TextButton")
+goodModeButton.Text = "Enable GoodMode"
+goodModeButton.Size = UDim2.new(0, 160, 0, 50)
+goodModeButton.Position = UDim2.new(0.05, 0, 0.7, 0)
+goodModeButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+goodModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+goodModeButton.Font = Enum.Font.SourceSansBold
+goodModeButton.TextSize = 20
+goodModeButton.Parent = playerFrame
+
+local function toggleGoodMode()
+	goodModeEnabled = not goodModeEnabled
+	goodModeButton.Text = goodModeEnabled and "Disable GoodMode" or "Enable GoodMode"
+	if goodModeEnabled then
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:FindFirstChild("Humanoid")
+		if humanoid then
+			humanoid.MaxHealth = math.huge 
+			humanoid.Health = math.huge
+			humanoid.HealthChanged:Connect(function()
+				if humanoid.Health < humanoid.MaxHealth then
+					humanoid.Health = humanoid.MaxHealth
+				end
+			end)
+		end
+	else
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:FindFirstChild("Humanoid")
+		if humanoid then
+			humanoid.MaxHealth = 100
+			humanoid.Health = 100
+		end
+	end
+end
+
+goodModeButton.MouseButton1Click:Connect(toggleGoodMode)
+
+local infiniteJumpEnabled = false
+local infiniteJumpButton = Instance.new("TextButton")
+infiniteJumpButton.Text = "Enable Infinite Jump"
+infiniteJumpButton.Size = UDim2.new(0, 160, 0, 50)
+infiniteJumpButton.Position = UDim2.new(0.55, 0, 0.7, 0)
+infiniteJumpButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+infiniteJumpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+infiniteJumpButton.Font = Enum.Font.SourceSansBold
+infiniteJumpButton.TextSize = 20
+infiniteJumpButton.Parent = playerFrame
+
+local userInputService = game:GetService("UserInputService")
+
+local function toggleInfiniteJump()
+	infiniteJumpEnabled = not infiniteJumpEnabled
+	infiniteJumpButton.Text = infiniteJumpEnabled and "Disable Infinite Jump" or "Enable Infinite Jump"
+end
+
+userInputService.JumpRequest:Connect(function()
+	if infiniteJumpEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+		player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+	end
+end)
+
+infiniteJumpButton.MouseButton1Click:Connect(toggleInfiniteJump)
+
