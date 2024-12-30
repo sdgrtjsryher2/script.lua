@@ -6,7 +6,7 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 564, 0, 360)
+frame.Size = UDim2.new(0, 563,0, 403)
 frame.Position = UDim2.new(0.5, -282, 0.5, -180)
 frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 frame.BackgroundTransparency = 0.1
@@ -26,6 +26,7 @@ closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeButton.Font = Enum.Font.SourceSansBold
 closeButton.TextSize = 20
 closeButton.Parent = frame
+
 
 closeButton.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
@@ -61,15 +62,15 @@ frame.InputEnded:Connect(function(input)
 	end
 end)
 
-local tabs = {"Troll", "Kill Mode", "Visual", "Player", "Settings"}
+local tabs = {"Troll", "Kill Mode", "Visual", "Player","Auto Shoot","Settings"}
 local tabButtons = {}
 local frames = {}
 
 for i, tabName in ipairs(tabs) do
 	local button = Instance.new("TextButton")
 	button.Text = tabName
-	button.Size = UDim2.new(0, 158, 0, 50)
-	button.Position = UDim2.new(0.018, 0, 0.032 + (i - 1) * 0.18, 0)
+	button.Size = UDim2.new(0, 180, 0, 50) 
+	button.Position = UDim2.new(0.02, 0, 0.03 + (i - 1) * 0.14, 0) 
 	button.BackgroundColor3 = Color3.fromRGB(170, 170, 170)
 	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	button.Font = Enum.Font.SourceSansBold
@@ -84,7 +85,7 @@ for i, tabName in ipairs(tabs) do
 
 	local tabFrame = Instance.new("Frame")
 	tabFrame.Size = UDim2.new(0, 358, 0, 266)
-	tabFrame.Position = UDim2.new(0.328, 0, 0.189, 0)
+	tabFrame.Position = UDim2.new(0.351, 0,0.172, 0)
 	tabFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	tabFrame.BorderSizePixel = 0
 	tabFrame.Visible = i == 1
@@ -97,6 +98,7 @@ for i, tabName in ipairs(tabs) do
 	frames[tabName] = tabFrame
 end
 
+
 for tabName, button in pairs(tabButtons) do
 	button.MouseButton1Click:Connect(function()
 		for name, tabFrame in pairs(frames) do
@@ -104,6 +106,16 @@ for tabName, button in pairs(tabButtons) do
 		end
 	end)
 end
+
+table.insert(tabs, "Auto Shoot")
+local autoShootFrame = Instance.new("Frame")
+autoShootFrame.Size = UDim2.new(0, 358, 0, 266)
+autoShootFrame.Position = UDim2.new(0.351, 0,0.172, 0)
+autoShootFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+autoShootFrame.BorderSizePixel = 0
+autoShootFrame.Visible = false
+autoShootFrame.Parent = frame
+
 
 local trollFrame = frames["Troll"]
 
@@ -249,121 +261,48 @@ end)
 
 local settingsFrame = frames["Settings"]
 
-local settingsLabel = Instance.new("TextLabel")
-settingsLabel.Text = "Settings Coming Soon..."
-settingsLabel.Size = UDim2.new(1, 0, 1, 0)
-settingsLabel.BackgroundTransparency = 1
-settingsLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-settingsLabel.Font = Enum.Font.SourceSansBold
-settingsLabel.TextSize = 24
-settingsLabel.Parent = settingsFrame
-
 local visualsFrame = frames["Visual"]
 
 local espEnabled = false
-local outlinesEnabled = false
 
 local espButton = Instance.new("TextButton")
 espButton.Text = "Enable ESP"
 espButton.Size = UDim2.new(0, 160, 0, 50)
-espButton.Position = UDim2.new(0.05, 0, 0.1, 0)
+espButton.Position = UDim2.new(0.05, 0, 0.05, 0)
 espButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
 espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 espButton.Font = Enum.Font.SourceSansBold
 espButton.TextSize = 20
 espButton.Parent = visualsFrame
 
-local outlineButton = Instance.new("TextButton")
-outlineButton.Text = "Enable Outlines"
-outlineButton.Size = UDim2.new(0, 160, 0, 50)
-outlineButton.Position = UDim2.new(0.05, 0, 0.3, 0)
-outlineButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-outlineButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-outlineButton.Font = Enum.Font.SourceSansBold
-outlineButton.TextSize = 20
-outlineButton.Parent = visualsFrame
-
-local function createESP(player)
-	local character = player.Character or player.CharacterAdded:Wait()
-	if not character:FindFirstChild("Head") then return end
-
-	local highlight = Instance.new("Highlight", character)
-	highlight.FillTransparency = 1
-	highlight.OutlineTransparency = outlinesEnabled and 0 or 1
-	highlight.Name = "ESPHighlight"
-
-	local billboard = Instance.new("BillboardGui", character.Head)
-	billboard.Size = UDim2.new(0, 200, 0, 50)
-	billboard.AlwaysOnTop = true
-	billboard.Name = "ESP"
-
-	local nameLabel = Instance.new("TextLabel", billboard)
-	nameLabel.Size = UDim2.new(1, 0, 1, 0)
-	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.Font = Enum.Font.SourceSansBold
-	nameLabel.TextSize = 14
-	nameLabel.TextStrokeTransparency = 0
-
-	local function updateESP()
-		if character:FindFirstChild("Humanoid") then
-			nameLabel.Text = player.Name .. " | HP: " .. math.floor(character.Humanoid.Health)
-
-			local tool = player.Backpack:FindFirstChildOfClass("Tool") or character:FindFirstChildOfClass("Tool")
-			if tool and tool.Name == "Knife" then
-				highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Красный для ножа
-			elseif tool and tool.Name == "Gun" then
-				highlight.OutlineColor = Color3.fromRGB(0, 0, 255) -- Синий для пистолета
-			else
-				highlight.OutlineColor = Color3.fromRGB(0, 255, 0) -- Зеленый если ничего нет
-			end
-		end
-	end
-
-	game:GetService("RunService").RenderStepped:Connect(updateESP)
-end
-
-local function toggleESP()
+espButton.MouseButton1Click:Connect(function()
 	espEnabled = not espEnabled
 	espButton.Text = espEnabled and "Disable ESP" or "Enable ESP"
 
 	if espEnabled then
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player then
-				createESP(plr)
+		for _, player in ipairs(game.Players:GetPlayers()) do
+			if player ~= game.Players.LocalPlayer and player.Character then
+				local espBox = Instance.new("BoxHandleAdornment")
+				espBox.Size = Vector3.new(4, 6, 2)
+				espBox.Color3 = Color3.fromRGB(255, 0, 0) 
+				espBox.AlwaysOnTop = true
+				espBox.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
+				espBox.ZIndex = 10
+				espBox.Parent = player.Character:FindFirstChild("HumanoidRootPart")
+				player.Character.HumanoidRootPart:SetAttribute("ESPBox", espBox)
 			end
 		end
-
-		game.Players.PlayerAdded:Connect(function(newPlayer)
-			createESP(newPlayer)
-		end)
 	else
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			local character = plr.Character
-			if character and character:FindFirstChild("ESPHighlight") then
-				character.ESPHighlight:Destroy()
-			end
-			if character and character:FindFirstChild("Head"):FindFirstChild("ESP") then
-				character.Head.ESP:Destroy()
+		for _, player in ipairs(game.Players:GetPlayers()) do
+			if player ~= game.Players.LocalPlayer and player.Character then
+				local espBox = player.Character.HumanoidRootPart:GetAttribute("ESPBox")
+				if espBox and espBox:IsA("Instance") then
+					espBox:Destroy()
+				end
 			end
 		end
 	end
-end
-
-local function toggleOutlines()
-	outlinesEnabled = not outlinesEnabled
-	outlineButton.Text = outlinesEnabled and "Disable Outlines" or "Enable Outlines"
-
-	for _, plr in pairs(game.Players:GetPlayers()) do
-		local character = plr.Character
-		if character and character:FindFirstChild("ESPHighlight") then
-			character.ESPHighlight.OutlineTransparency = outlinesEnabled and 0 or 1
-		end
-	end
-end
-
-espButton.MouseButton1Click:Connect(toggleESP)
-outlineButton.MouseButton1Click:Connect(toggleOutlines)
+end)
 
 
 local killModeFrame = frames["Kill Mode"]
@@ -409,55 +348,103 @@ runService.RenderStepped:Connect(function()
 			for _, target in pairs(game.Players:GetPlayers()) do
 				if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
 					if not killFriends and player:IsFriendsWith(target.UserId) then
-						continue
+						continue 
 					end
-					target.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+					player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame 
 				end
 			end
 		end
 	end
 end)
 
-local spinEnabled = false
-local knockbackForce = 100 -- Сила отталкивания
+local autoShootCorner = Instance.new("UICorner")
+autoShootCorner.CornerRadius = UDim.new(0, 10)
+autoShootCorner.Parent = autoShootFrame
 
-local spinButton = Instance.new("TextButton")
-spinButton.Text = "Enable Spin"
-spinButton.Size = UDim2.new(0, 160, 0, 50)
-spinButton.Position = UDim2.new(0.05, 0, 0.65, 0)
-spinButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-spinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-spinButton.Font = Enum.Font.SourceSansBold
-spinButton.TextSize = 20
-spinButton.Parent = playerFrame
+frames["Auto Shoot"] = autoShootFrame
 
-local function toggleSpin()
-    spinEnabled = not spinEnabled
-    spinButton.Text = spinEnabled and "Disable Spin" or "Enable Spin"
+local autoShootEnabled = false
+local hitboxShootDelay = 0.1
 
-    if spinEnabled then
-        -- Запускаем крутилку
-        runService.RenderStepped:Connect(function()
-            if spinEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(10), 0)
-            end
-        end)
+local autoShootButton = Instance.new("TextButton")
+autoShootButton.Text = "On Auto Shoot"
+autoShootButton.Size = UDim2.new(0, 160, 0, 50)
+autoShootButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+autoShootButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+autoShootButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoShootButton.Font = Enum.Font.SourceSansBold
+autoShootButton.TextSize = 20
+autoShootButton.Parent = autoShootFrame
 
-        -- Добавляем обработчик отталкивания
-        player.Character.HumanoidRootPart.Touched:Connect(function(hit)
-            if spinEnabled and hit.Parent and hit.Parent:FindFirstChild("Humanoid") and hit.Parent ~= player.Character then
-                local humanoid = hit.Parent:FindFirstChild("Humanoid")
-                if humanoid and humanoid.Health > 0 then
-                    local bodyVelocity = Instance.new("BodyVelocity")
-                    bodyVelocity.Velocity = (hit.Position - player.Character.HumanoidRootPart.Position).unit * knockbackForce
-                    bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-                    bodyVelocity.P = 3000
-                    bodyVelocity.Parent = hit.Parent:FindFirstChild("HumanoidRootPart")
-                    game:GetService("Debris"):AddItem(bodyVelocity, 0.2) -- Удаляем BodyVelocity через 0.2 секунды
-                end
-            end
-        end)
-    end
-end
+autoShootButton.MouseButton1Click:Connect(function()
+	autoShootEnabled = not autoShootEnabled
+	autoShootButton.Text = autoShootEnabled and "Off Auto Shoot" or "On Auto Shoot"
+end)
 
-spinButton.MouseButton1Click:Connect(toggleSpin)
+local delayInput = Instance.new("TextBox")
+delayInput.Text = tostring(hitboxShootDelay)
+delayInput.PlaceholderText = "Delay (Seconds)"
+delayInput.Size = UDim2.new(0, 160, 0, 50)
+delayInput.Position = UDim2.new(0.05, 0, 0.25, 0)
+delayInput.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+delayInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+delayInput.Font = Enum.Font.FredokaOne
+delayInput.TextSize = 20
+delayInput.Parent = autoShootFrame
+
+local delayCorner = Instance.new("UICorner")
+delayCorner.CornerRadius = UDim.new(0, 10)
+delayCorner.Parent = delayInput
+
+delayInput.FocusLost:Connect(function()
+	local newDelay = tonumber(delayInput.Text)
+	if newDelay and newDelay > 0 then
+		hitboxShootDelay = newDelay
+	end
+end)
+
+runService.RenderStepped:Connect(function()
+	if autoShootEnabled and player.Character then
+		local pistol = player.Backpack:FindFirstChild("Pistol") or player.Character:FindFirstChild("Pistol")
+		if pistol then
+			for _, target in pairs(game.Players:GetPlayers()) do
+				if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+					local knife = target.Backpack:FindFirstChild("Knife") or target.Character:FindFirstChild("Knife")
+					local humanoid = target.Character:FindFirstChild("Humanoid")
+
+					if knife and humanoid and humanoid.Health > 0 then
+						local ray = Ray.new(player.Character.HumanoidRootPart.Position, (target.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Unit * 500)
+						local hit, position = workspace:FindPartOnRay(ray, player.Character, false, true)
+
+						if hit and hit:IsDescendantOf(target.Character) then
+							wait(hitboxShootDelay)
+							pistol:Activate()
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+
+local autoGuiButton = Instance.new("TextButton")
+autoGuiButton.Text = "Disable Auto GUI"
+autoGuiButton.Size = UDim2.new(0, 160, 0, 50)
+autoGuiButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+autoGuiButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+autoGuiButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoGuiButton.Font = Enum.Font.SourceSansBold
+autoGuiButton.TextSize = 20
+autoGuiButton.Parent = settingsFrame
+
+autoGuiButton.MouseButton1Click:Connect(function()
+	autoGuiEnabled = not autoGuiEnabled
+	autoGuiButton.Text = autoGuiEnabled and "Disable Auto GUI" or "Enable Auto GUI"
+end)
+
+player.CharacterAdded:Connect(function()
+	if autoGuiEnabled then
+		screenGui.Parent = player:WaitForChild("PlayerGui")
+	end
+end)
