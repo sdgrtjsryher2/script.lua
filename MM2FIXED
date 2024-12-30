@@ -4,6 +4,7 @@ local runService = game:GetService("RunService")
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 563,0, 403)
@@ -261,48 +262,39 @@ end)
 
 local settingsFrame = frames["Settings"]
 
+
 local visualsFrame = frames["Visual"]
 
 local espEnabled = false
+local outlinesEnabled = false
 
-local espButton = Instance.new("TextButton")
-espButton.Text = "Enable ESP"
-espButton.Size = UDim2.new(0, 160, 0, 50)
-espButton.Position = UDim2.new(0.05, 0, 0.05, 0)
-espButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-espButton.Font = Enum.Font.SourceSansBold
-espButton.TextSize = 20
-espButton.Parent = visualsFrame
 
-espButton.MouseButton1Click:Connect(function()
-	espEnabled = not espEnabled
-	espButton.Text = espEnabled and "Disable ESP" or "Enable ESP"
+local outlineButton = Instance.new("TextButton")
+outlineButton.Text = "Enable Outlines"
+outlineButton.Size = UDim2.new(0, 160, 0, 50)
+outlineButton.Position = UDim2.new(0.05, 0, 0.1, 0)
+outlineButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+outlineButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+outlineButton.Font = Enum.Font.SourceSansBold
+outlineButton.TextSize = 20
+outlineButton.Parent = visualsFrame
 
-	if espEnabled then
-		for _, player in ipairs(game.Players:GetPlayers()) do
-			if player ~= game.Players.LocalPlayer and player.Character then
-				local espBox = Instance.new("BoxHandleAdornment")
-				espBox.Size = Vector3.new(4, 6, 2)
-				espBox.Color3 = Color3.fromRGB(255, 0, 0) 
-				espBox.AlwaysOnTop = true
-				espBox.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
-				espBox.ZIndex = 10
-				espBox.Parent = player.Character:FindFirstChild("HumanoidRootPart")
-				player.Character.HumanoidRootPart:SetAttribute("ESPBox", espBox)
-			end
-		end
-	else
-		for _, player in ipairs(game.Players:GetPlayers()) do
-			if player ~= game.Players.LocalPlayer and player.Character then
-				local espBox = player.Character.HumanoidRootPart:GetAttribute("ESPBox")
-				if espBox and espBox:IsA("Instance") then
-					espBox:Destroy()
-				end
-			end
+local function updateOutlines()
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("BasePart") and obj:FindFirstChild("Highlight") then
+			local highlight = obj.Highlight
+			highlight.OutlineTransparency = outlinesEnabled and 0 or 1
 		end
 	end
-end)
+end
+
+local function toggleOutlines()
+	outlinesEnabled = not outlinesEnabled
+	outlineButton.Text = outlinesEnabled and "Disable Outlines" or "Enable Outlines"
+	updateOutlines()
+end
+
+outlineButton.MouseButton1Click:Connect(toggleOutlines)
 
 
 local killModeFrame = frames["Kill Mode"]
@@ -428,23 +420,116 @@ runService.RenderStepped:Connect(function()
 end)
 
 
-local autoGuiButton = Instance.new("TextButton")
-autoGuiButton.Text = "Disable Auto GUI"
-autoGuiButton.Size = UDim2.new(0, 160, 0, 50)
-autoGuiButton.Position = UDim2.new(0.05, 0, 0.05, 0)
-autoGuiButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-autoGuiButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoGuiButton.Font = Enum.Font.SourceSansBold
-autoGuiButton.TextSize = 20
-autoGuiButton.Parent = settingsFrame
+local visualFrame = frames["Visual"]
 
-autoGuiButton.MouseButton1Click:Connect(function()
-	autoGuiEnabled = not autoGuiEnabled
-	autoGuiButton.Text = autoGuiEnabled and "Disable Auto GUI" or "Enable Auto GUI"
-end)
+local espButton = Instance.new("TextButton")
+espButton.Text = "Enable ESP"
+espButton.Size = UDim2.new(0, 160, 0, 50)
+espButton.Position = UDim2.new(0.05, 0, 0.1, 0)
+espButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+espButton.Font = Enum.Font.SourceSansBold
+espButton.TextSize = 20
+espButton.Parent = visualFrame
 
-player.CharacterAdded:Connect(function()
-	if autoGuiEnabled then
-		screenGui.Parent = player:WaitForChild("PlayerGui")
+local function checkTool(player)
+	local character = player.Character
+	local backpack = player:FindFirstChild("Backpack")
+
+	if character then
+		for _, tool in ipairs(character:GetChildren()) do
+			if tool:IsA("Tool") then
+				if tool.Name == "Knife" then
+					return "Knife"
+				elseif tool.Name == "Gun" then
+					return "Gun"
+				end
+			end
+		end
 	end
-end)
+
+	if backpack then
+		for _, tool in ipairs(backpack:GetChildren()) do
+			if tool:IsA("Tool") then
+				if tool.Name == "Knife" then
+					return "Knife"
+				elseif tool.Name == "Gun" then
+					return "Gun"
+				end
+			end
+		end
+	end
+
+	return nil
+end
+
+local function createESP(player)
+	local character = player.Character or player.CharacterAdded:Wait()
+	if not character:FindFirstChild("Head") then return end
+
+	local highlight = Instance.new("Highlight", character)
+	highlight.FillTransparency = 1
+	highlight.OutlineTransparency = 0
+
+	local billboard = Instance.new("BillboardGui", character.Head)
+	billboard.Size = UDim2.new(0, 200, 0, 50)
+	billboard.AlwaysOnTop = true
+	billboard.Name = "ESP"
+
+	local nameLabel = Instance.new("TextLabel", billboard)
+	nameLabel.Size = UDim2.new(1, 0, 1, 0)
+	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Font = Enum.Font.SourceSansBold
+	nameLabel.TextSize = 14
+	nameLabel.TextStrokeTransparency = 0
+
+	local function updateESP()
+		if character:FindFirstChild("Humanoid") then
+			nameLabel.Text = player.Name .. " | HP: " .. math.floor(character.Humanoid.Health)
+
+			local tool = checkTool(player)
+			if tool == "Knife" then
+				highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+			elseif tool == "Gun" then
+				highlight.OutlineColor = Color3.fromRGB(0, 0, 255)
+			else
+				highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+			end
+		end
+	end
+
+	game:GetService("RunService").RenderStepped:Connect(updateESP)
+end
+
+local espEnabled = false
+
+local function toggleESP()
+	espEnabled = not espEnabled
+	espButton.Text = espEnabled and "Disable ESP" or "Enable ESP"
+
+	if espEnabled then
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr ~= player then
+				createESP(plr)
+			end
+		end
+
+		game.Players.PlayerAdded:Connect(function(newPlayer)
+			createESP(newPlayer)
+		end)
+	else
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			local character = plr.Character
+			if character and character:FindFirstChild("Highlight") then
+				character.Highlight:Destroy()
+			end
+			if character and character:FindFirstChild("Head"):FindFirstChild("ESP") then
+				character.Head.ESP:Destroy()
+			end
+		end
+	end
+end
+
+espButton.MouseButton1Click:Connect(toggleESP)
+
