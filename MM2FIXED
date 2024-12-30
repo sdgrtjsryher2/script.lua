@@ -417,3 +417,47 @@ runService.RenderStepped:Connect(function()
 		end
 	end
 end)
+
+local spinEnabled = false
+local knockbackForce = 100 -- Сила отталкивания
+
+local spinButton = Instance.new("TextButton")
+spinButton.Text = "Enable Spin"
+spinButton.Size = UDim2.new(0, 160, 0, 50)
+spinButton.Position = UDim2.new(0.05, 0, 0.65, 0)
+spinButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+spinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spinButton.Font = Enum.Font.SourceSansBold
+spinButton.TextSize = 20
+spinButton.Parent = playerFrame
+
+local function toggleSpin()
+    spinEnabled = not spinEnabled
+    spinButton.Text = spinEnabled and "Disable Spin" or "Enable Spin"
+
+    if spinEnabled then
+        -- Запускаем крутилку
+        runService.RenderStepped:Connect(function()
+            if spinEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(10), 0)
+            end
+        end)
+
+        -- Добавляем обработчик отталкивания
+        player.Character.HumanoidRootPart.Touched:Connect(function(hit)
+            if spinEnabled and hit.Parent and hit.Parent:FindFirstChild("Humanoid") and hit.Parent ~= player.Character then
+                local humanoid = hit.Parent:FindFirstChild("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    local bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.Velocity = (hit.Position - player.Character.HumanoidRootPart.Position).unit * knockbackForce
+                    bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+                    bodyVelocity.P = 3000
+                    bodyVelocity.Parent = hit.Parent:FindFirstChild("HumanoidRootPart")
+                    game:GetService("Debris"):AddItem(bodyVelocity, 0.2) -- Удаляем BodyVelocity через 0.2 секунды
+                end
+            end
+        end)
+    end
+end
+
+spinButton.MouseButton1Click:Connect(toggleSpin)
