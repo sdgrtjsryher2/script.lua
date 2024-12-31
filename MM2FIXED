@@ -5,14 +5,25 @@ local runService = game:GetService("RunService")
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
+screenGui.Name = "BetterHack"
+
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
 
 local frame = Instance.new("Frame")
+frame.Name = "Main"
 frame.Size = UDim2.new(0, 563,0, 403)
 frame.Position = UDim2.new(0.5, -282, 0.5, -180)
 frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 frame.BackgroundTransparency = 0.1
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
+frame.Visible = true
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Parent = frame
+uiStroke.Thickness = 1.8
 
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0, 10)
@@ -85,6 +96,7 @@ for i, tabName in ipairs(tabs) do
 	tabButtons[tabName] = button
 
 	local tabFrame = Instance.new("Frame")
+	tabFrame.Name = tabName
 	tabFrame.Size = UDim2.new(0, 358, 0, 266)
 	tabFrame.Position = UDim2.new(0.351, 0,0.172, 0)
 	tabFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -95,6 +107,10 @@ for i, tabName in ipairs(tabs) do
 	local tabFrameCorner = Instance.new("UICorner")
 	tabFrameCorner.CornerRadius = UDim.new(0, 10)
 	tabFrameCorner.Parent = tabFrame
+	
+	local uiStroke = Instance.new("UIStroke")
+	uiStroke.Parent = tabFrame
+	uiStroke.Thickness = 1.8
 
 	frames[tabName] = tabFrame
 end
@@ -116,6 +132,9 @@ autoShootFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 autoShootFrame.BorderSizePixel = 0
 autoShootFrame.Visible = false
 autoShootFrame.Parent = frame
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Parent = autoShootFrame
+uiStroke.Thickness = 1.8
 
 
 local trollFrame = frames["Troll"]
@@ -342,7 +361,7 @@ runService.RenderStepped:Connect(function()
 					if not killFriends and player:IsFriendsWith(target.UserId) then
 						continue 
 					end
-					player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame 
+					target.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
 				end
 			end
 		end
@@ -356,68 +375,141 @@ autoShootCorner.Parent = autoShootFrame
 frames["Auto Shoot"] = autoShootFrame
 
 local autoShootEnabled = false
-local hitboxShootDelay = 0.1
+local hitboxSize = 1000
+
+local Aimbot = Instance.new("TextButton")
+Aimbot.Text = "On Aimbot"
+Aimbot.Size = UDim2.new(0, 160, 0, 50)
+Aimbot.Position = UDim2.new(0.05, 0, 0.05, 0)
+Aimbot.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+Aimbot.TextColor3 = Color3.fromRGB(255, 255, 255)
+Aimbot.Font = Enum.Font.SourceSansBold
+Aimbot.TextSize = 20
+Aimbot.Parent = autoShootFrame
 
 local autoShootButton = Instance.new("TextButton")
-autoShootButton.Text = "On Auto Shoot"
+autoShootButton.Text = "Kill Murder"
 autoShootButton.Size = UDim2.new(0, 160, 0, 50)
-autoShootButton.Position = UDim2.new(0.05, 0, 0.05, 0)
-autoShootButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+autoShootButton.Position = UDim2.new(0.05, 0, 0.40, 0)
+autoShootButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 autoShootButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 autoShootButton.Font = Enum.Font.SourceSansBold
 autoShootButton.TextSize = 20
 autoShootButton.Parent = autoShootFrame
 
 autoShootButton.MouseButton1Click:Connect(function()
-	autoShootEnabled = not autoShootEnabled
-	autoShootButton.Text = autoShootEnabled and "Off Auto Shoot" or "On Auto Shoot"
-end)
-
-local delayInput = Instance.new("TextBox")
-delayInput.Text = tostring(hitboxShootDelay)
-delayInput.PlaceholderText = "Delay (Seconds)"
-delayInput.Size = UDim2.new(0, 160, 0, 50)
-delayInput.Position = UDim2.new(0.05, 0, 0.25, 0)
-delayInput.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-delayInput.TextColor3 = Color3.fromRGB(0, 0, 0)
-delayInput.Font = Enum.Font.FredokaOne
-delayInput.TextSize = 20
-delayInput.Parent = autoShootFrame
-
-local delayCorner = Instance.new("UICorner")
-delayCorner.CornerRadius = UDim.new(0, 10)
-delayCorner.Parent = delayInput
-
-delayInput.FocusLost:Connect(function()
-	local newDelay = tonumber(delayInput.Text)
-	if newDelay and newDelay > 0 then
-		hitboxShootDelay = newDelay
-	end
+	autoTeleportEnabled = not autoTeleportEnabled
+	autoShootButton.Text = autoTeleportEnabled and "Disable AutoTeleport" or "Enable AutoTeleport"
+	autoShootButton.BackgroundColor3 = autoTeleportEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 end)
 
 runService.RenderStepped:Connect(function()
-	if autoShootEnabled and player.Character then
-		local pistol = player.Backpack:FindFirstChild("Pistol") or player.Character:FindFirstChild("Pistol")
-		if pistol then
-			for _, target in pairs(game.Players:GetPlayers()) do
-				if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-					local knife = target.Backpack:FindFirstChild("Knife") or target.Character:FindFirstChild("Knife")
-					local humanoid = target.Character:FindFirstChild("Humanoid")
+	if not autoTeleportEnabled or not player.Character then
+		return
+	end
 
-					if knife and humanoid and humanoid.Health > 0 then
-						local ray = Ray.new(player.Character.HumanoidRootPart.Position, (target.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Unit * 500)
-						local hit, position = workspace:FindPartOnRay(ray, player.Character, false, true)
+	local gun = player.Backpack:FindFirstChild("Pistol") or player.Character:FindFirstChild("Pistol")
+	if not gun then
+		return
+	end
 
-						if hit and hit:IsDescendantOf(target.Character) then
-							wait(hitboxShootDelay)
-							pistol:Activate()
-						end
-					end
+	for _, target in pairs(game.Players:GetPlayers()) do
+		if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+			local knife = target.Backpack:FindFirstChild("Knife") or target.Character:FindFirstChild("Knife")
+			local humanoid = target.Character:FindFirstChild("Humanoid")
+
+			if knife and humanoid and humanoid.Health > 0 then
+				local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+				local playerRoot = player.Character:FindFirstChild("HumanoidRootPart")
+
+				if targetRoot and playerRoot then
+					targetRoot.CFrame = playerRoot.CFrame * CFrame.new(3, 0, 0) 
+					print("Телепортирован мардер рядом:", target.Name)
 				end
 			end
 		end
 	end
 end)
+
+Aimbot.MouseButton1Click:Connect(function()
+	autoShootEnabled = not autoShootEnabled
+	Aimbot.Text = autoShootEnabled and "Off Aimbot" or "On Aimbot"
+end)
+
+local OnlyMurder = true
+
+
+local function hasKnife(targetPlayer)
+	local character = targetPlayer.Character
+	local backpack = targetPlayer:FindFirstChild("Backpack")
+
+	if character then
+		for _, tool in ipairs(character:GetChildren()) do
+			if tool:IsA("Tool") and tool.Name == "Knife" then
+				return true
+			end
+		end
+	end
+
+	if backpack then
+		for _, tool in ipairs(backpack:GetChildren()) do
+			if tool:IsA("Tool") and tool.Name == "Knife" then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+local function getClosestTarget()
+	local closestPlayer = nil
+	local shortestDistance = math.huge
+
+	for _, targetPlayer in pairs(game.Players:GetPlayers()) do
+		if targetPlayer ~= player and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			if OnlyMurder and not hasKnife(targetPlayer) then
+				continue
+			end
+
+			local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+			local distance = (player.Character.HumanoidRootPart.Position - targetPosition).Magnitude
+
+			if distance < shortestDistance then
+				closestPlayer = targetPlayer
+				shortestDistance = distance
+			end
+		end
+	end
+
+	return closestPlayer
+end
+
+
+runService.RenderStepped:Connect(function()
+	if userInputService.MouseBehavior ~= Enum.MouseBehavior.LockCenter then
+		return
+	end
+
+	local gun = player.Backpack:FindFirstChild("Gun") or (player.Character and player.Character:FindFirstChild("Gun"))
+	if not gun then
+		return
+	end
+
+	local targetPlayer = getClosestTarget()
+	if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+		local camera = workspace.CurrentCamera
+
+		camera.CFrame = CFrame.new(camera.CFrame.Position, targetPosition)
+	end
+end)
+
+local sizeCorner = Instance.new("UICorner")
+sizeCorner.CornerRadius = UDim.new(0, 10)
+sizeCorner.Parent = Aimbot
+
+
 
 
 local visualFrame = frames["Visual"]
@@ -532,4 +624,234 @@ local function toggleESP()
 end
 
 espButton.MouseButton1Click:Connect(toggleESP)
+
+local bhopEnabled = false
+local strafeEnabled = false
+local currentDirection = Vector3.new()
+
+
+local bhopEnabled = true 
+local speedIncrement = 90
+local maxSpeed = 360
+local baseWalkSpeed = 16 
+
+local function enableBhop()
+	local currentSpeed = baseWalkSpeed
+
+	if player.Character and player.Character:FindFirstChild("Humanoid") then
+		player.Character.Humanoid.WalkSpeed = currentSpeed
+	end
+
+	userInputService.InputBegan:Connect(function(input, isProcessed)
+		if not bhopEnabled or isProcessed then return end
+		if input.KeyCode == Enum.KeyCode.Space then
+			local character = player.Character
+			if character and character:FindFirstChild("Humanoid") then
+				local humanoid = character.Humanoid
+				if humanoid.FloorMaterial ~= Enum.Material.Air then
+					currentSpeed = math.min(currentSpeed + speedIncrement, maxSpeed)
+					humanoid.WalkSpeed = currentSpeed
+				end
+			end
+		end
+	end)
+
+	userInputService.InputEnded:Connect(function(input, isProcessed)
+		if not bhopEnabled or isProcessed then return end
+		if input.KeyCode == Enum.KeyCode.Space then
+			local character = player.Character
+			if character and character:FindFirstChild("Humanoid") then
+				local humanoid = character.Humanoid
+				humanoid.WalkSpeed = baseWalkSpeed
+			end
+		end
+	end)
+end
+
+local function enableStrafe()
+	userInputService.InputBegan:Connect(function(input)
+		if strafeEnabled then
+			if input.KeyCode == Enum.KeyCode.A then
+				currentDirection = Vector3.new(-1, 0, 0)
+			elseif input.KeyCode == Enum.KeyCode.D then
+				currentDirection = Vector3.new(1, 0, 0)
+			end
+		end
+	end)
+
+	userInputService.InputEnded:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.D then
+			currentDirection = Vector3.new()
+		end
+	end)
+
+	runService.RenderStepped:Connect(function()
+		if strafeEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local rootPart = player.Character.HumanoidRootPart
+			local direction = rootPart.CFrame.RightVector * currentDirection.X
+			rootPart.Velocity = Vector3.new(direction.X * 50, rootPart.Velocity.Y, direction.Z * 50)
+		end
+	end)
+end
+
+local playerFrame = frames["Player"]
+
+local bhopButton = Instance.new("TextButton")
+bhopButton.Text = "Enable Bhop"
+bhopButton.Size = UDim2.new(0, 160, 0, 50)
+bhopButton.Position = UDim2.new(0.05, 0, 0.65, 0)
+bhopButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+bhopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+bhopButton.Font = Enum.Font.SourceSansBold
+bhopButton.TextSize = 20
+bhopButton.Parent = playerFrame
+
+bhopButton.MouseButton1Click:Connect(function()
+	bhopEnabled = not bhopEnabled
+	bhopButton.Text = bhopEnabled and "Disable Bhop" or "Enable Bhop"
+	if bhopEnabled then
+		enableBhop()
+	end
+end)
+
+--[[local strafeButton = Instance.new("TextButton")
+strafeButton.Text = "Enable Strafe"
+strafeButton.Size = UDim2.new(0, 160, 0, 50)
+strafeButton.Position = UDim2.new(0.05, 0, 0.85, 0)
+strafeButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+strafeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+strafeButton.Font = Enum.Font.SourceSansBold
+strafeButton.TextSize = 20
+strafeButton.Parent = playerFrame
+
+strafeButton.MouseButton1Click:Connect(function()
+	strafeEnabled = not strafeEnabled
+	strafeButton.Text = strafeEnabled and "Disable Strafe" or "Enable Strafe"
+	if strafeEnabled then
+		enableStrafe()
+	end
+end)]]
+
+local settingsFrame = frames["Settings"]
+
+local strokeMode = "Classic"
+local strokeConnections = {} 
+
+
+local function applyStrokeMode()
+	for _, uiElement in pairs(screenGui:GetDescendants()) do
+		if uiElement:IsA("UIStroke") then
+			if strokeMode == "Classic" then
+				uiElement.Color = Color3.fromRGB(0, 0, 0) 
+			elseif strokeMode == "Rainbow" then
+				if strokeConnections[uiElement] then
+					strokeConnections[uiElement]:Disconnect()
+				end
+
+				local connection
+				connection = runService.RenderStepped:Connect(function()
+					uiElement.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+				end)
+				strokeConnections[uiElement] = connection
+			end
+		end
+	end
+
+
+	if strokeMode == "Classic" then
+		for _, connection in pairs(strokeConnections) do
+			connection:Disconnect()
+		end
+		strokeConnections = {}
+	end
+end
+
+
+local strokeModeButton = Instance.new("TextButton")
+strokeModeButton.Text = "Stroke Mode: Classic"
+strokeModeButton.Size = UDim2.new(0, 160, 0, 50)
+strokeModeButton.Position = UDim2.new(0.05, 0, 0.1, 0)
+strokeModeButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+strokeModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+strokeModeButton.Font = Enum.Font.SourceSansBold
+strokeModeButton.TextSize = 20
+strokeModeButton.Parent = settingsFrame
+
+strokeModeButton.MouseButton1Click:Connect(function()
+	strokeMode = (strokeMode == "Classic") and "Rainbow" or "Classic"
+	strokeModeButton.Text = "Stroke Mode: " .. strokeMode
+	applyStrokeMode()
+end)
+
+applyStrokeMode()
+
+local Wremia = Instance.new("TextButton")
+Wremia.Text = "Time: Day"
+Wremia.Size = UDim2.new(0, 160, 0, 50)
+Wremia.Position = UDim2.new(0.05, 0, 0.30, 0)
+Wremia.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+Wremia.TextColor3 = Color3.fromRGB(255, 255, 255)
+Wremia.Font = Enum.Font.SourceSansBold
+Wremia.TextSize = 20
+Wremia.Parent = settingsFrame
+local currentTime = "Day"
+
+local function changeTime()
+	local lighting = game:GetService("Lighting")
+
+	if currentTime == "Day" then
+		currentTime = "Night"
+		lighting.ClockTime = 18 
+	else
+		currentTime = "Day" 
+		lighting.ClockTime = 12 
+	end
+end
+
+Wremia.MouseButton1Click:Connect(function()
+	if currentTime == "Day" then
+		Wremia.Text = "Time: Night"
+	else
+		Wremia.Text = "Time: Day"
+	end
+	changeTime()
+end)
+
+
+local saveButton = Instance.new("TextButton")
+saveButton.Text = "Save Position"
+saveButton.Size = UDim2.new(0, 160,0, 20)
+saveButton.Position = UDim2.new(0.536, 0,0.901, 0)
+saveButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+saveButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+saveButton.Font = Enum.Font.SourceSansBold
+saveButton.TextSize = 20
+saveButton.Parent = playerFrame
+
+saveButton.MouseButton1Click:Connect(function()
+	if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		savedPosition = player.Character.HumanoidRootPart.Position
+		print("Позиция сохранена:", savedPosition)
+	end
+end)
+
+local tpButton = Instance.new("TextButton")
+tpButton.Text = "TP Position"
+tpButton.Size = UDim2.new(0, 160,0, 20)
+tpButton.Position = UDim2.new(0.05, 0,0.901, 0)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+tpButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+tpButton.Font = Enum.Font.SourceSansBold
+tpButton.TextSize = 20
+tpButton.Parent = playerFrame
+
+tpButton.MouseButton1Click:Connect(function()
+	if savedPosition and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		player.Character.HumanoidRootPart.CFrame = CFrame.new(savedPosition)
+	end
+end)
+
+
+
+
 
