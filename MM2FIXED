@@ -2,24 +2,23 @@ local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local runService = game:GetService("RunService")
 
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 screenGui.Name = "BetterHack"
 
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
 
 local frame = Instance.new("Frame")
 frame.Name = "Main"
-frame.Size = UDim2.new(0, 563,0, 403)
+frame.Size = UDim2.new(0, 563, 0, 403)
 frame.Position = UDim2.new(0.5, -282, 0.5, -180)
 frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 frame.BackgroundTransparency = 0.1
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
 frame.Visible = true
+
 
 local uiStroke = Instance.new("UIStroke")
 uiStroke.Parent = frame
@@ -28,6 +27,7 @@ uiStroke.Thickness = 1.8
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0, 10)
 uiCorner.Parent = frame
+
 
 local closeButton = Instance.new("TextButton")
 closeButton.Text = "X"
@@ -39,10 +39,10 @@ closeButton.Font = Enum.Font.SourceSansBold
 closeButton.TextSize = 20
 closeButton.Parent = frame
 
-
 closeButton.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
+
 
 local dragging = false
 local dragStart
@@ -74,60 +74,99 @@ frame.InputEnded:Connect(function(input)
 	end
 end)
 
-local tabs = {"Troll", "Kill Mode", "Visual", "Player","Auto Shoot","Settings"}
-local tabButtons = {}
+
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(0, 180, 0.9, 0) 
+scrollingFrame.Position = UDim2.new(0.02, 0, 0.05, 0)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0) 
+scrollingFrame.ScrollBarThickness = 8
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+scrollingFrame.Parent = frame
+
+local uiCornerScrolling = Instance.new("UICorner")
+uiCornerScrolling.CornerRadius = UDim.new(0, 10)
+uiCornerScrolling.Parent = scrollingFrame
+
+
+
+local uiPadding = Instance.new("UIPadding")
+uiPadding.PaddingTop = UDim.new(0, 10)
+uiPadding.PaddingBottom = UDim.new(0, 10)
+uiPadding.PaddingLeft = UDim.new(0, 5)
+uiPadding.PaddingRight = UDim.new(0, 5)
+uiPadding.Parent = scrollingFrame
+
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 10) 
+listLayout.Parent = scrollingFrame
+
+
+listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 20)
+end)
+
 local frames = {}
 
-for i, tabName in ipairs(tabs) do
-	local button = Instance.new("TextButton")
-	button.Text = tabName
-	button.Size = UDim2.new(0, 180, 0, 50) 
-	button.Position = UDim2.new(0.02, 0, 0.03 + (i - 1) * 0.14, 0) 
-	button.BackgroundColor3 = Color3.fromRGB(170, 170, 170)
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	button.Font = Enum.Font.SourceSansBold
-	button.TextSize = 20
-	button.Parent = frame
-
-	local buttonCorner = Instance.new("UICorner")
-	buttonCorner.CornerRadius = UDim.new(0, 10)
-	buttonCorner.Parent = button
-
-	tabButtons[tabName] = button
-
+local function createTabFrame(tabName)
 	local tabFrame = Instance.new("Frame")
 	tabFrame.Name = tabName
-	tabFrame.Size = UDim2.new(0, 358, 0, 266)
-	tabFrame.Position = UDim2.new(0.351, 0,0.172, 0)
+	tabFrame.Size = UDim2.new(0.628, 0,0.75, 0)
+	tabFrame.Position = UDim2.new(0.35, 0,0.2, 0)
 	tabFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	tabFrame.BorderSizePixel = 0
-	tabFrame.Visible = i == 1
+	tabFrame.Visible = false
 	tabFrame.Parent = frame
 
-	local tabFrameCorner = Instance.new("UICorner")
-	tabFrameCorner.CornerRadius = UDim.new(0, 10)
-	tabFrameCorner.Parent = tabFrame
-	
-	local uiStroke = Instance.new("UIStroke")
-	uiStroke.Parent = tabFrame
-	uiStroke.Thickness = 1.8
+	local uiCornerTab = Instance.new("UICorner")
+	uiCornerTab.CornerRadius = UDim.new(0, 10)
+	uiCornerTab.Parent = tabFrame
+
+	local uiStrokeTab = Instance.new("UIStroke")
+	uiStrokeTab.Thickness = 1.8
+	uiStrokeTab.Parent = tabFrame
 
 	frames[tabName] = tabFrame
 end
 
+local function selectTab(tabName)
+	for name, tabFrame in pairs(frames) do
+		tabFrame.Visible = (name == tabName)
+	end
+end
 
-for tabName, button in pairs(tabButtons) do
+local tabs = {"Troll", "Visual", "Player", "Legit Sheriff", "Legit Murder","Rage Murder","Rage Sheriff", "Settings"}
+
+for _, tabName in ipairs(tabs) do
+	createTabFrame(tabName)
+
+	local button = Instance.new("TextButton")
+	button.Text = tabName
+	button.Size = UDim2.new(1, 0, 0, 50) 
+	button.BackgroundColor3 = Color3.fromRGB(170, 170, 170)
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.Font = Enum.Font.SourceSansBold
+	button.TextSize = 20
+	button.Parent = scrollingFrame
+
+	local uiCornerButton = Instance.new("UICorner")
+	uiCornerButton.CornerRadius = UDim.new(0, 10)
+	uiCornerButton.Parent = button
+
 	button.MouseButton1Click:Connect(function()
-		for name, tabFrame in pairs(frames) do
-			tabFrame.Visible = name == tabName
-		end
+		selectTab(tabName)
 	end)
 end
 
-table.insert(tabs, "Auto Shoot")
+selectTab(tabs[1])
+
+
+
+table.insert(tabs, "Legit Sheriff")
 local autoShootFrame = Instance.new("Frame")
-autoShootFrame.Size = UDim2.new(0, 358, 0, 266)
-autoShootFrame.Position = UDim2.new(0.351, 0,0.172, 0)
+autoShootFrame.Size = UDim2.new(0.628, 0,0.75, 0)
+autoShootFrame.Position = UDim2.new(0.35, 0,0.2, 0)
 autoShootFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 autoShootFrame.BorderSizePixel = 0
 autoShootFrame.Visible = false
@@ -316,25 +355,23 @@ end
 outlineButton.MouseButton1Click:Connect(toggleOutlines)
 
 
-local killModeFrame = frames["Kill Mode"]
+local killModeFrame = frames["Rage Murder"]
 
 local killAuraEnabled = false
 local killFriends = false
 
-local killauraButton = Instance.new("TextButton")
-killauraButton.Text = "Enable Killaura"
-killauraButton.Size = UDim2.new(0, 160, 0, 50)
-killauraButton.Position = UDim2.new(0.05, 0, 0.05, 0)
-killauraButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-killauraButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-killauraButton.Font = Enum.Font.SourceSansBold
-killauraButton.TextSize = 20
-killauraButton.Parent = killModeFrame
 
-killauraButton.MouseButton1Click:Connect(function()
-	killAuraEnabled = not killAuraEnabled
-	killauraButton.Text = killAuraEnabled and "Disable Killaura" or "Enable Killaura"
-end)
+ 
+
+local killallButton = Instance.new("TextButton")
+killallButton.Text = "Enable Kill All"
+killallButton.Size = UDim2.new(0, 160, 0, 50)
+killallButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+killallButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+killallButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+killallButton.Font = Enum.Font.SourceSansBold
+killallButton.TextSize = 20
+killallButton.Parent = killModeFrame
 
 local killFriendsButton = Instance.new("TextButton")
 killFriendsButton.Text = "Kill Friends: Off"
@@ -372,7 +409,7 @@ local autoShootCorner = Instance.new("UICorner")
 autoShootCorner.CornerRadius = UDim.new(0, 10)
 autoShootCorner.Parent = autoShootFrame
 
-frames["Auto Shoot"] = autoShootFrame
+frames["Legit Sheriff"] = autoShootFrame
 
 local autoShootEnabled = false
 local hitboxSize = 1000
@@ -386,50 +423,69 @@ Aimbot.TextColor3 = Color3.fromRGB(255, 255, 255)
 Aimbot.Font = Enum.Font.SourceSansBold
 Aimbot.TextSize = 20
 Aimbot.Parent = autoShootFrame
+Aimbot.BorderSizePixel = 0
 
-local autoShootButton = Instance.new("TextButton")
-autoShootButton.Text = "Kill Murder"
-autoShootButton.Size = UDim2.new(0, 160, 0, 50)
-autoShootButton.Position = UDim2.new(0.05, 0, 0.40, 0)
-autoShootButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-autoShootButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoShootButton.Font = Enum.Font.SourceSansBold
-autoShootButton.TextSize = 20
-autoShootButton.Parent = autoShootFrame
+local players = game.Players
 
-autoShootButton.MouseButton1Click:Connect(function()
-	autoTeleportEnabled = not autoTeleportEnabled
-	autoShootButton.Text = autoTeleportEnabled and "Disable AutoTeleport" or "Enable AutoTeleport"
-	autoShootButton.BackgroundColor3 = autoTeleportEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+local silentAimEnabled = false
+
+local silentAimButton = Instance.new("TextButton")
+silentAimButton.Text = "Enable Silent Aim"
+silentAimButton.Size = UDim2.new(0, 160, 0, 50)
+silentAimButton.Position = UDim2.new(0.05, 0, 0.30, 0)
+silentAimButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+silentAimButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+silentAimButton.Font = Enum.Font.SourceSansBold
+silentAimButton.TextSize = 20
+silentAimButton.Parent = autoShootFrame
+
+silentAimButton.MouseButton1Click:Connect(function()
+	silentAimEnabled = not silentAimEnabled
+	silentAimButton.Text = silentAimEnabled and "Disable Silent Aim" or "Enable Silent Aim"
+	silentAimButton.BackgroundColor3 = silentAimEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(0, 200, 255)
 end)
 
+
+local function hasGun(character)
+	return (character:FindFirstChild("Gun") or player.Backpack:FindFirstChild("Gun")) ~= nil
+end
+
+
+local function hasKnife(targetPlayer)
+	local targetCharacter = targetPlayer.Character
+	local targetBackpack = targetPlayer:FindFirstChild("Backpack")
+
+	if targetCharacter and targetCharacter:FindFirstChild("Knife") then
+		return true
+	end
+	if targetBackpack and targetBackpack:FindFirstChild("Knife") then
+		return true
+	end
+	return false
+end
+
+
+local function getKnifeTarget()
+	for _, targetPlayer in ipairs(players:GetPlayers()) do
+		if targetPlayer ~= player and hasKnife(targetPlayer) then
+			return targetPlayer
+		end
+	end
+	return nil
+end
+
+
 runService.RenderStepped:Connect(function()
-	if not autoTeleportEnabled or not player.Character then
-		return
-	end
-
-	local gun = player.Backpack:FindFirstChild("Pistol") or player.Character:FindFirstChild("Pistol")
-	if not gun then
-		return
-	end
-
-	for _, target in pairs(game.Players:GetPlayers()) do
-		if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-			local knife = target.Backpack:FindFirstChild("Knife") or target.Character:FindFirstChild("Knife")
-			local humanoid = target.Character:FindFirstChild("Humanoid")
-
-			if knife and humanoid and humanoid.Health > 0 then
-				local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-				local playerRoot = player.Character:FindFirstChild("HumanoidRootPart")
-
-				if targetRoot and playerRoot then
-					targetRoot.CFrame = playerRoot.CFrame * CFrame.new(3, 0, 0) 
-					print("Телепортирован мардер рядом:", target.Name)
-				end
-			end
+	if silentAimEnabled and hasGun(player.Character) then
+		local target = getKnifeTarget()
+		if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+			local aimAt = target.Character.HumanoidRootPart.Position
+			local camera = workspace.CurrentCamera
+			camera.CFrame = CFrame.new(camera.CFrame.Position, aimAt) -- Наводка камеры
 		end
 	end
 end)
+
 
 Aimbot.MouseButton1Click:Connect(function()
 	autoShootEnabled = not autoShootEnabled
@@ -438,29 +494,6 @@ end)
 
 local OnlyMurder = true
 
-
-local function hasKnife(targetPlayer)
-	local character = targetPlayer.Character
-	local backpack = targetPlayer:FindFirstChild("Backpack")
-
-	if character then
-		for _, tool in ipairs(character:GetChildren()) do
-			if tool:IsA("Tool") and tool.Name == "Knife" then
-				return true
-			end
-		end
-	end
-
-	if backpack then
-		for _, tool in ipairs(backpack:GetChildren()) do
-			if tool:IsA("Tool") and tool.Name == "Knife" then
-				return true
-			end
-		end
-	end
-
-	return false
-end
 
 local function getClosestTarget()
 	local closestPlayer = nil
