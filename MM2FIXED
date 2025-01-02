@@ -360,6 +360,7 @@ local HitboxVisible = Instance.new("TextButton")
 local killAuraEnabled = false
 local hitbox = Instance.new("Part")
 local visible = false
+local mouse = player:GetMouse()
 
 killAuraButton.Parent = LegitModeFrame
 killAuraButton.Size = UDim2.new(0, 200, 0, 50)
@@ -369,6 +370,7 @@ killAuraButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 killAuraButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 killAuraButton.Font = Enum.Font.SourceSansBold
 killAuraButton.TextSize = 20
+
 
 HitboxVisible.Parent = LegitModeFrame
 HitboxVisible.Size = UDim2.new(0, 200, 0, 50)
@@ -386,6 +388,7 @@ hitbox.Transparency = 1
 hitbox.BrickColor = BrickColor.new("Bright red")
 hitbox.Material = Enum.Material.ForceField
 hitbox.Parent = workspace
+
 
 HitboxVisible.MouseButton1Click:Connect(function()
 	visible = not visible
@@ -409,45 +412,27 @@ local function updateHitboxPosition(player)
 end
 
 
-local function activateItem(player)
-	if not player or not player.Character then return end
 
-	local character = player.Character
-	local backpack = player:FindFirstChild("Backpack")
-	if not backpack then return end
-
-	local knifeInBackpack = backpack:FindFirstChild("Knife")
-	local knifeInCharacter = character:FindFirstChild("Knife")
-	local currentItemInCharacter = character:FindFirstChildOfClass("Tool")
-
-	if knifeInCharacter then
-		knifeInCharacter:Activate() 
-	elseif knifeInBackpack then
-		if currentItemInCharacter then
-			currentItemInCharacter.Parent = backpack 
-		end
-		knifeInBackpack.Parent = character 
-		knifeInBackpack:Activate() 
-		knifeInBackpack.Parent = backpack 
-	end
-end
 
 hitbox.Touched:Connect(function(hit)
 	local player = game.Players:GetPlayerFromCharacter(hit.Parent)
 	if player and player ~= game.Players.LocalPlayer then
-		activateItem(player)
+		if not player or not player.Character then return end
+
+		local character = player.Character
+		local backpack = player:FindFirstChild("Backpack")
+
+		local knifeInBackpack = backpack:FindFirstChild("Knife") 
+		if knifeInBackpack then
+			knifeInBackpack:Activate()
+		else
+			print("Нож не найден ни в инвентаре, ни в рюкзаке.")
+		end
 	end
 end)
 
 game:GetService("RunService").RenderStepped:Connect(function()
 	updateHitboxPosition(game.Players.LocalPlayer)
-end)
-
-
-killAuraButton.MouseButton1Click:Connect(function()
-	killAuraEnabled = not killAuraEnabled
-	killAuraButton.Text = killAuraEnabled and "KillAura: On" or "KillAura: Off"
-	killAuraButton.BackgroundColor3 = killAuraEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 end)
 
 
