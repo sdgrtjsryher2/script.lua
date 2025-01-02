@@ -355,52 +355,49 @@ end
 outlineButton.MouseButton1Click:Connect(toggleOutlines)
 
 local LegitModeFrame = frames["Legit Murder"]
-
 local killAuraButton = Instance.new("TextButton")
 local HitboxVisible = Instance.new("TextButton")
+local killAuraEnabled = false
+local hitbox = Instance.new("Part")
+local visible = false
 
 killAuraButton.Parent = LegitModeFrame
-HitboxVisible.Parent = LegitModeFrame
-
-HitboxVisible.Size = UDim2.new(0, 200, 0, 50)
-HitboxVisible.Position = UDim2.new(0.05, 0,0.25, 0)
-HitboxVisible.Text = "Hitbox"
-HitboxVisible.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-HitboxVisible.TextColor3 = Color3.fromRGB(255, 255, 255)
-HitboxVisible.Font = Enum.Font.SourceSansBold
-HitboxVisible.TextSize = 20
-
 killAuraButton.Size = UDim2.new(0, 200, 0, 50)
-killAuraButton.Position = UDim2.new(0.05, 0,0.05, 0)
+killAuraButton.Position = UDim2.new(0.05, 0, 0.05, 0)
 killAuraButton.Text = "KillAura: Off"
 killAuraButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 killAuraButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 killAuraButton.Font = Enum.Font.SourceSansBold
 killAuraButton.TextSize = 20
 
-
-local killAuraEnabled = false
-local hitbox = Instance.new("Part")
-
+HitboxVisible.Parent = LegitModeFrame
+HitboxVisible.Size = UDim2.new(0, 200, 0, 50)
+HitboxVisible.Position = UDim2.new(0.05, 0, 0.25, 0)
+HitboxVisible.Text = "Hitbox: Hidden"
+HitboxVisible.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+HitboxVisible.TextColor3 = Color3.fromRGB(255, 255, 255)
+HitboxVisible.Font = Enum.Font.SourceSansBold
+HitboxVisible.TextSize = 20
 
 hitbox.Size = Vector3.new(10, 10, 10)
 hitbox.Anchored = true
 hitbox.CanCollide = false
 hitbox.Transparency = 1
 hitbox.BrickColor = BrickColor.new("Bright red")
-hitbox.Parent = workspace
 hitbox.Material = Enum.Material.ForceField
-
+hitbox.Parent = workspace
 
 HitboxVisible.MouseButton1Click:Connect(function()
-	local visible = false
-	if visible == false then
-		hitbox.Transparency = 0
-		visible = true
-	elseif hitbox == true then
-		hitbox.Transparency = 1
-		visible = false
-	end
+	visible = not visible
+	hitbox.Transparency = visible and 0 or 1
+	HitboxVisible.Text = visible and "Hitbox: Visible" or "Hitbox: Hidden"
+	HitboxVisible.BackgroundColor3 = visible and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+end)
+
+killAuraButton.MouseButton1Click:Connect(function()
+	killAuraEnabled = not killAuraEnabled
+	killAuraButton.Text = killAuraEnabled and "KillAura: On" or "KillAura: Off"
+	killAuraButton.BackgroundColor3 = killAuraEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 end)
 
 local function updateHitboxPosition(player)
@@ -424,18 +421,14 @@ local function activateItem(player)
 	local currentItemInCharacter = character:FindFirstChildOfClass("Tool")
 
 	if knifeInCharacter then
-		knifeInCharacter:Activate()
-
+		knifeInCharacter:Activate() 
 	elseif knifeInBackpack then
 		if currentItemInCharacter then
 			currentItemInCharacter.Parent = backpack 
 		end
 		knifeInBackpack.Parent = character 
-		knifeInBackpack:Activate()
-		knifeInCharacter = character:FindFirstChild("Knife")
-		if knifeInCharacter then
-			knifeInCharacter.Parent = backpack 
-		end
+		knifeInBackpack:Activate() 
+		knifeInBackpack.Parent = backpack 
 	end
 end
 
@@ -445,7 +438,6 @@ hitbox.Touched:Connect(function(hit)
 		activateItem(player)
 	end
 end)
-
 
 game:GetService("RunService").RenderStepped:Connect(function()
 	updateHitboxPosition(game.Players.LocalPlayer)
@@ -461,11 +453,12 @@ end)
 
 local killModeFrame = frames["Rage Murder"]
 
+
+ 
+local runService = game:GetService("RunService")
 local killallEnabled = false
 local killFriends = false
 
-
- 
 
 local killallButton = Instance.new("TextButton")
 killallButton.Text = "Enable Kill All"
@@ -487,17 +480,20 @@ killFriendsButton.Font = Enum.Font.SourceSansBold
 killFriendsButton.TextSize = 20
 killFriendsButton.Parent = killModeFrame
 
+
 killFriendsButton.MouseButton1Click:Connect(function()
 	killFriends = not killFriends
 	killFriendsButton.Text = killFriends and "Kill Friends: On" or "Kill Friends: Off"
 	killFriendsButton.BackgroundColor3 = killFriends and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 end)
 
+
 killallButton.MouseButton1Click:Connect(function()
 	killallEnabled = not killallEnabled
-	killallButton.Text = killallEnabled and "Off Kill all" or "Enable Kill all"
-	killallButton.BackgroundColor3 = killFriends and Color3.fromRGB(0, 255, 4) or Color3.fromRGB(255, 0, 0)
+	killallButton.Text = killallEnabled and "Off Kill All" or "Enable Kill All"
+	killallButton.BackgroundColor3 = killallEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 end)
+
 
 runService.RenderStepped:Connect(function()
 	if killallEnabled and player.Character then
@@ -505,15 +501,17 @@ runService.RenderStepped:Connect(function()
 		if knife then
 			for _, target in pairs(game.Players:GetPlayers()) do
 				if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-					if not killFriends and not player:IsFriendsWith(target.UserId) then
-						continue 
+					if not killFriends and player:IsFriendsWith(target.UserId) then
+						continue
 					end
+
 					target.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
 				end
 			end
 		end
 	end
 end)
+
 
 
 local autoShootCorner = Instance.new("UICorner")
